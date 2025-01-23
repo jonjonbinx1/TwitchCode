@@ -11,10 +11,10 @@ class MessageRunner:
         while time.time() < start_time + duration:
             messages = self.twitch.twitch_receive_messages()
             for listener in listeners:
-                listener(messages)
+                listener.call(messages)
             if keep_alive:
                 start_time = time.time()
-            return messages
+            # return messages
     
     def start(self, duration, listener=[]):
         print(duration)

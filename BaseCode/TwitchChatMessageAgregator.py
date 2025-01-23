@@ -23,15 +23,13 @@ class Aggregator:
                 start_time = time.time()
         return commandAndCount
     
-    def getChatMessages(self, duration, regex=None, listner=None):
+    def getCommandNoLimits(self, duration, regex=None, listner=None):
         commandAndCount = {}
         start_time = time.time()
         keep_alive = False
         if duration == 0:
             duration = 100
             keep_alive = True
-        if regex == None:
-            regex = "!poll "
         while time.time() < start_time + duration:
             messages = self.twitch.twitch_receive_messages()
             for message in messages:
@@ -42,7 +40,7 @@ class Aggregator:
                     else:
                         commandAndCount.update({content : 1})
             if listner != None:
-                listner(commandAndCount)
+                listner(messages)
             if keep_alive:
                 start_time = time.time()
         return commandAndCount
@@ -58,7 +56,7 @@ class Aggregator:
         if len(commands) > 0:
             return self.getCommand(duration, commands, commandAndCount)
         else:
-            return self.getChatMessages(duration, regex=regex, listner=listener)
+            return self.getCommandNoLimits(duration, regex=regex, listner=listener)
 
 
 
