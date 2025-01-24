@@ -1,44 +1,67 @@
 import gpt4all
 import os
 import json
+import torch
+import requests
 
-# Initialize the GPT-4All model
-with open("config.json", "r") as config_file:
-    config = json.load(config_file)
+class BinxyAI:
+    # model = None
+    conversation_history = []
 
-# Get the model path from the config
-model_path = config["model_path"]
-model = gpt4all.GPT4All(model_path, device="gpu")
+    def StartBinxy(self, load_past_context):
+        # Initialize the GPT-4All model
+        with open("config.json", "r") as config_file:
+            config = json.load(config_file)
 
-# Initialize conversation history
-conversation_history = ""
-#load initial context if the file exists
-if os.path.exists(config["model_initial_context"]):
-    with open(config["model_initial_context"], "r") as file:
-        conversation_history = file.read()
-    print("initial context loaded")
+        # Get the model path from the config (uncomment if needed)
+        # model_path = config["model_path"]
+        # self.model = gpt4all.GPT4All(model_path, device="cuda")
 
-#load the latest conversation history if the file exists
-if os.path.exists("conversation_history.txt"):
-    with open("conversation_history.txt", "r") as file:
-        conversation_history = file.read()
-while True:
-    prompt = input("Enter your prompt: ")
-    if prompt.lower() == "exit":
-        break
+        # Load initial context if the file exists
+        # if os.path.exists(config["model_initial_context"]):
+        #     with open(config["model_initial_context"], "r") as file:
+        #         initial_context = file.read()
+        #     self.conversation_history.append(initial_context)
+        #     print("Initial context loaded")
 
-    # Update conversation history with the new prompt
-    conversation_history += prompt
+        # Load the latest conversation history if the file exists
+        if os.path.exists("conversation_history.txt") and load_past_context:
+            with open("conversation_history.txt", "r") as file:
+                saved_history = file.read().splitlines()
+                self.conversation_history.extend(saved_history)
 
-    # Generate text with the conversation history
-    response = model.generate(conversation_history)
+    def GetResponseFromAPI(self, prompt):
+        url = "http://localhost:4891/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json"
+        }
 
-    # Update conversation history with the model's response
-    conversation_history += response
+        # Update conversation history with a sliding window
+        if prompt.lower() == "exit":
+            # Save the conversation history to a file
+            with open("conversation_history.txt", "w") as file:
+                file.write("\n".join(self.conversation_history))
+            self.conversation_history.append("Say Goodbye Binxy!")
+        else:
+            self.conversation_history.append(f"You: {prompt}")
+            if len(self.conversation_history) > 8:  # Sliding window of the last 4 user-AI pairs
+                self.conversation_history = self.conversation_history[-8:]
 
-    # Print the generated text
-    print(response)
+        # Prepare the input prompt with the current sliding window conversation history
+        input_prompt = "\n".join(self.conversation_history)
+        data = {
+            "model": "MPT Chat",
+            "messages": [{"role": "user", "content": input_prompt}],
+            "max_tokens": 500,
+            "temperature": 0.28
+        }
+        response = requests.post(url, headers=headers, data=json.dumps(data))
 
-# Save the conversation history to a text file
-with open("conversation_history.txt", "w") as file:
-    file.write(conversation_history)
+        if response.status_code == 200:
+            response_json = response.json()
+            content = response_json['choices'][0]['message']['content']
+            self.conversation_history.append(f"Binxy: {content}")
+            return content
+        else:
+            print(f"Error: {response.status_code}, {response.text}")
+            return None
