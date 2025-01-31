@@ -1,0 +1,14 @@
+Error: video system not initialized
+Traceback (most recent call last):
+  File "C:\Users\johnb\TwitchCode\Games\DinoRunner.py", line 88, in startRunner
+    for event in pygame.event.get():
+                 ^^^^^^^^^^^^^^^^^^
+pygame.error: video system not initialized
+
+Error: video system not initialized
+Traceback (most recent call last):
+  File "C:\Users\johnb\TwitchCode\Games\DinoRunner.py", line 88, in startRunner
+    for event in pygame.event.get():
+                 ^^^^^^^^^^^^^^^^^^
+pygame.error: video system not initialized
+
