@@ -8,7 +8,7 @@ import os
 class DinoRunner:
     # Screen dimensions
     SCREEN_WIDTH = 800
-    SCREEN_HEIGHT = 300
+    SCREEN_HEIGHT = 325
 
     # Colors
     WHITE = (255, 255, 255)
@@ -72,7 +72,7 @@ class DinoRunner:
 
             # Obstacle generation timing
             self.obstacle_timer = 0
-            self.obstacle_interval = random.randint(60, 150)  # Random interval between 1 and 2.5 seconds
+            self.obstacle_interval = random.randint(90, 150)  # Random interval between 1 and 2.5 seconds
 
             # Score
             self.score = 0
@@ -115,7 +115,7 @@ class DinoRunner:
                         self.dino_y = self.SCREEN_HEIGHT - 100
 
                     # Obstacle movement and generation
-                    self.obstacle_x -= 5
+                    self.obstacle_x -= 3
                     if self.obstacle_x + self.obstacle_width < 0:
                         self.score += 1  # Increase score only when the obstacle moves off screen
                         self.obstacle_x = self.SCREEN_WIDTH
@@ -123,7 +123,7 @@ class DinoRunner:
                         self.obstacle_type = random.choice(["jump", "duck"])
                         self.obstacle_height = random.randint(50, 150)  # Random height for taller obstacles
                         if self.obstacle_type == "duck":
-                            self.obstacle_height = 80
+                            self.obstacle_height = 50
                         self.obstacle_y = self.SCREEN_HEIGHT - self.obstacle_height if self.obstacle_type == "jump" else self.SCREEN_HEIGHT - 150  # Adjust position for duck obstacles
                     # print("scored: ", self.score)
 
@@ -154,7 +154,7 @@ class DinoRunner:
                     # Update the screen
                     self.screen.blit(self.game_surface, (0, 0))
                     pygame.display.flip()
-                    clock.tick(30)
+                    clock.tick(25)
                     # print("tick")
                 else:
                     # print("Game over. Restarting.")
